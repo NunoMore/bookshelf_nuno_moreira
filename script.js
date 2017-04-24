@@ -129,15 +129,16 @@ function Bookshelf(){
     this.booksStack = new Stack();
 
     // funcao de receber da API da google
-    this.search = function(string){
+    this.search = function(string, index){
         var aux = this;
-        $.get('https://www.googleapis.com/books/v1/volumes?q=' + string + '&printType=books&maxResults=40&orderBy=relevance')
+        $.get('https://www.googleapis.com/books/v1/volumes?q=' + string + '&printType=books&maxResults=10&startIndex=' + index)
             .done(function(data){
                 data.totalItems != 0 ? aux.put(data) : aux.put(emptyData);
+                SearchIndexConstant += data.items.length;
             })
             .fail(function(data){
                 console.log("ERROR: " + data);
-                 aux.put(emptyData);
+                aux.put(emptyData);
         });
         this.loading();
     }
@@ -214,9 +215,9 @@ function Bookshelf(){
         setTimeout(function(){ 
 
             // mostra livros novamente ou um livro vazio
-            bookshelf.show(0) ? bookshelf.show(0).write(1) : emptyBook.write(1);
-            bookshelf.show(1) ? bookshelf.show(1).write(2) : emptyBook.write(2);
-            bookshelf.show(2) ? bookshelf.show(2).write(3) : emptyBook.write(3);
+            bookshelf.show(0) ? bookshelf.show(0).write(1) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+            bookshelf.show(1) ? bookshelf.show(1).write(2) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+            bookshelf.show(2) ? bookshelf.show(2).write(3) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
 
             // Remocao de animacao 
             $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
@@ -316,11 +317,12 @@ var emptyData = new Data({
 
 // botao de search (procura)
 var data = {"bookshelf":bookshelf}
-
+var SearchIndexConstant = 0;
 $("#btn_search").click(data, function(event){
+    SearchIndexConstant = 0;
     var string = $("#search_input").val();
     event.data.bookshelf.erase();
-    event.data.bookshelf.search( string );
+    event.data.bookshelf.search( string , SearchIndexConstant);
     
     $(".btns_g_ng").show();
     $(".btn_next").hide();

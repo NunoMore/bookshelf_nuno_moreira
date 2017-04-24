@@ -6,7 +6,7 @@
 }
 
 /* Mudar o botao do rato (mouse) */
-div {
+body {
   cursor: url(http://artofproblemsolving.com/assets/images/smilies/agent.gif), auto;
 }
 
