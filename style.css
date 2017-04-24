@@ -1,0 +1,248 @@
+
+
+/* fundo */
+.fundo_geral{
+	background-image: url(https://s-media-cache-ak0.pinimg.com/originals/e0/e6/2a/e0e62a309e23219b0dfdcb55d0cb8c8c.jpg);
+}
+
+/* Mudar o botao do rato (mouse) */
+div {
+  cursor: url(http://artofproblemsolving.com/assets/images/smilies/agent.gif), auto;
+}
+
+/* titulo com mostra o tema que esta em vigor */
+#title_description{
+  text-align: center;
+  color: silver;
+}
+
+#img_title{
+  width: 10%;
+}
+
+/* intro */
+#intro{
+  text-align: center;
+  color: silver;
+  font-size: 15px;
+}
+
+/* Centrar Texto */
+.centrartexto{
+	text-align: center;
+}
+
+/* imagens a 90% */
+img{
+	width: 200px;
+}
+
+/* cor de texto clara */
+.text_color{
+  color: silver;
+}
+
+/* tipo de letra 8-bit*/
+.eight_bit {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  padding: 10px;
+  overflow: hidden;
+  border: none;
+  font: normal 40px/1 "VT323", Helvetica, sans-serif;
+  color: silver;
+  text-align: center;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  text-shadow: 5px 5px 0 black;
+}
+
+/* fundo cinzenta */
+.fundo_negro{
+  background-color: #666;
+  color: black;
+  font-weight: bold;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+/* footer */
+.footer{
+  background-color: #666;
+  color: black;
+  font-weight: bold;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  color: white;
+  width: 100%;
+}
+
+/* header */
+.header{
+  background-color: #666;
+  color: black;
+  font-weight: bold;
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  color: white;
+  width: 100%;
+}
+
+/* botoes de gosto */
+.like_button{
+  margin-top: 10px;
+}
+
+/* borda dos livros */
+.border3D{
+  padding: 20px;
+  border-style: outset;
+  height: 100%;
+  min-height: 700px;
+}
+
+/* borda sinopse */
+.border_sinopse{
+  border-style: solid;
+  border-color: silver;
+  margin-bottom: 4px;
+  margin-right: 2px;
+}
+
+/* borda do titulo */
+.border_title{
+  border-style: dotted;
+  border-color: silver;
+  border-radius: 500px;
+}
+
+/* alteracao de tamanho de div em mobile */
+@media only screen and (max-width: 768px) {
+  .glow {
+    width: 45%;
+    text-align: center;
+    top: 1px;
+    left: 1px;
+    overflow: hidden;
+  }
+
+  #img_title{
+    display: none;
+  }
+
+  .div_extra{
+    display: none;
+  }
+
+  #div_instructions{
+    display: none;
+  }
+}
+
+/* Efeito de brilho colcado nas imagens */
+.glow {
+  text-align: center;
+  top: 1px;
+  left: 1px;
+  overflow: hidden;
+}
+.glow:before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 150%;
+  height: 150%;
+  width: 100px;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  transform: rotate(45deg);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(50%, rgba(255, 255, 255, 1)), color-stop(100%, rgba(255, 255, 255, 0)));
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background: -o-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background: -ms-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#00ffffff', GradientType=1);
+  -webkit-animation: 2s myani linear infinite;
+  animation: 2s myani linear infinite;
+}
+@-webkit-keyframes myani {
+  0% {
+    top: 100%;
+    left: 150%;
+  }
+  100% {
+    top: -150%;
+    left: -150%;
+  }
+}
+@keyframes myani {
+  0% {
+    top: 100%;
+    left: 150%;
+  }
+  100% {
+    top: -150%;
+    left: -150%;
+  }
+}
+
+
+/* wave */
+.Wave-Loader {
+  font-size: 25pt;
+  text-align: center;
+  height: 120px;
+  line-height: 110px;
+  /*padding-top: 2px;*/
+  padding-top: 18px;
+  background-color: white;
+}
+
+/*algumas imagens para wave style hehehe */
+
+/*http://i.imgur.com/uFpLbYt.png*/
+/*http://www.sebastien-laframboise.com/wp-content/uploads/twiz-wave.png*/
+/*http://chrisbewick.com/blog/wp-content/uploads/2012/11/ps3-410x253.png*/
+
+
+.Wave-Loader.Wave {
+  background-image: url("http://chrisbewick.com/blog/wp-content/uploads/2012/11/ps3-410x253.png");
+  -moz-background-clip: text;
+  -o-background-clip: text;
+    -webkit-background-clip: text;
+    background-clip: text;
+  color: transparent;
+  text-shadow: 0px 0px rgba(255, 255, 255, 0.06);
+  animation: Wave-Loader 1s infinite linear;
+  background-size: 200px 100px;
+  background-repeat: repeat-x;
+  opacity: 1;
+}
+@keyframes Wave-Loader {
+  0% { background-position: 0 bottom; }
+  100% { background-position: 200px bottom; }
+}
+
+
+/* loading screen */
+#myProgress {
+    width: 100%;
+    background-color: black;
+    text-align: center;
+    color: silver;
+    border-radius: 20px;
+}
+#myBar {
+    width: 10%;
+    height: 30px;
+    background-color: silver;
+    text-align: center; /* To center it horizontally (if you want) */
+    line-height: 30px; /* To center it vertically */
+    color: black; 
+    font-style: bold;
+    border-radius: 20px;
+}
