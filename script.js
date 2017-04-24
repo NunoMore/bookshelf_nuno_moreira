@@ -129,9 +129,9 @@ function Bookshelf(){
     this.booksStack = new Stack();
 
     // funcao de receber da API da google
-    this.search = function(string){
+    this.search = function(string, index){
         var aux = this;
-        $.get('https://www.googleapis.com/books/v1/volumes?q=' + string + '&printType=books&maxResults=40&orderBy=relevance')
+        $.get('https://www.googleapis.com/books/v1/volumes?q=' + string + '&printType=books&maxResults=40&orderBy=relevance&startIndex=' + index)
             .done(function(data){
                 data.totalItems != 0 ? aux.put(data) : aux.put(emptyData);
             })
