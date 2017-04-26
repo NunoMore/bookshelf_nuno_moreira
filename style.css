@@ -7,7 +7,7 @@
 
 /* Mudar o botao do rato (mouse) */
 body {
-  cursor: url(http://artofproblemsolving.com/assets/images/smilies/agent.gif), auto;
+  cursor: url(https://artofproblemsolving.com/assets/images/smilies/agent.gif), auto;
 }
 
 /* titulo com mostra o tema que esta em vigor */
@@ -210,7 +210,7 @@ img{
 
 
 .Wave-Loader.Wave {
-  background-image: url("http://chrisbewick.com/blog/wp-content/uploads/2012/11/ps3-410x253.png");
+  background-image: url("https://chrisbewick.com/blog/wp-content/uploads/2012/11/ps3-410x253.png");
   -moz-background-clip: text;
   -o-background-clip: text;
     -webkit-background-clip: text;
