@@ -342,8 +342,45 @@ $("#btn_stack").click(data, function(event){
     $(".btn_next").show();
 });
 
-// DATABASE ... -------------------------------
 
+// BASE DE DADOS ... -------------------------------
+var db;
+function Database(){
+
+    this.open = function(){
+        try {
+            if (!window.openDatabase) {
+                alert('not supported');
+            } else {
+                var shortName = 'database.sql';
+                var version = '1.0';
+                var displayName = 'DATA';
+                var maxSize = 2*1024*1024; // in bytes
+                db = openDatabase(shortName, version, displayName, maxSize);
+         
+            }
+        } catch(e) {
+            // Error handling code goes here.
+            if (e == 2) {
+                // Version number mismatch.
+                alert("Invalid database version.");
+            } else {
+                alert("Unknown error "+e+".");
+            }
+        }
+    }
+
+    this.errorHandler = function(transaction, error){
+            // error.message is a human-readable string.
+            // error.code is a numeric error code
+            alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
+         
+            // Handle errors here
+            var we_think_this_error_is_fatal = true;
+            if (we_think_this_error_is_fatal) return true;
+            return false;
+        }
+}
 
 var db;
 try {
@@ -379,17 +416,6 @@ function errorHandler(transaction, error)
     return false;
 }
  
-function dataHandler(transaction, results)
-{
-    // Handle the results
-    var string = "Users IP are:\n\n";
-    for (var i=0; i<results.rows.length; i++) {
-        var row = results.rows.item(i);
-        string += row['USER_IP'] + "\n";
-    }
-    alert(string);
-}
- 
 db.transaction(
     function (transaction) {
         transaction.executeSql("CREATE TABLE IF NOT EXISTS USER("+
@@ -413,8 +439,8 @@ db.transaction(
                                     "FOREIGN KEY(BOOKS_ID) REFERENCES BOOK(BOOKS_ID)"+
                                 ");");
 
-        transaction.executeSql("INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)"
-+"VALUES('first title -0', 'first img -0', 'first desc -0', 'first link -0');");
+        transaction.executeSql("INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)"+
+                                "VALUES('first title -0', 'first img -0', 'first desc -0', 'first link -0');");
 
         transaction.executeSql(" SELECT * from BOOK;",
             [], // array of values for the ? placeholders
