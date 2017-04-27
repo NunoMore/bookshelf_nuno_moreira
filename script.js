@@ -344,9 +344,12 @@ $("#btn_stack").click(data, function(event){
 
 
 // BASE DE DADOS ... -------------------------------
-var db;
 function Database(){
 
+	// parametro para abrir a base de dados no metodo open()
+	this.db;
+
+	// Abre a base de dados
     this.open = function(){
         try {
             if (!window.openDatabase) {
@@ -356,7 +359,7 @@ function Database(){
                 var version = '1.0';
                 var displayName = 'DATA';
                 var maxSize = 2*1024*1024; // in bytes
-                db = openDatabase(shortName, version, displayName, maxSize);
+                this.db = openDatabase(shortName, version, displayName, maxSize);
          
             }
         } catch(e) {
@@ -370,88 +373,77 @@ function Database(){
         }
     }
 
-    this.errorHandler = function(transaction, error){
-            // error.message is a human-readable string.
-            // error.code is a numeric error code
-            alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
-         
-            // Handle errors here
-            var we_think_this_error_is_fatal = true;
-            if (we_think_this_error_is_fatal) return true;
-            return false;
-        }
+    // // funçao que retorna o erro numa janela de alerta
+    // this.errorHandler = function(transaction, error){
+    //     // error.message is a human-readable string.
+    //     // error.code is a numeric error code
+    //     alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
+     
+    //     // Handle errors here
+    //     var we_think_this_error_is_fatal = true;
+    //     if (we_think_this_error_is_fatal) return true;
+    //     return false;
+    // }
+
+    // funcao para apagar uma tabela da base de dados
+    this.erase = function(table){
+    	this.db.transaction( function(transaction){
+    		// apaga a tabela
+    		transaction.executeSql("DROP TABLE " + table + ";");
+    	});
+    }
+
+	// Cria as tabelas necessárias
+    this.create = function(){
+    	this.db.transaction( function(transaction){
+	    	transaction.executeSql("CREATE TABLE IF NOT EXISTS USER("+
+	                                    "USER_IP     TEXT    PRIMARY KEY     NOT NULL"+
+	                                ");");
+
+	        transaction.executeSql("CREATE TABLE IF NOT EXISTS BOOK("+
+	                                    "BOOK_ID     INTEGER PRIMARY KEY AUTOINCREMENT   NOT NULL,"+
+	                                    "TITLE       TEXT,"+
+	                                    "IMG_SRC     TEXT,"+
+	                                    "DESCRIPTION TEXT,"+
+	                                    "LINK        TEXT"+
+	                                ");");
+
+	        transaction.executeSql("CREATE TABLE IF NOT EXISTS RATING("+
+	                                    "USER_IP 	 TEXT,"+ // para futuro uso
+	                                    "BOOK_ID     INT,"+  // id do livro
+	                                    "LIKES       INT,"+  // like sera sempre "1" ou "0"
+	                                    "DISLIKES    INT,"+  // para futuro uso
+	                                    "FOREIGN KEY(USER_IP) REFERENCES USER(USER_IP),"+
+	                                    "FOREIGN KEY(BOOK_ID) REFERENCES BOOK(BOOK_ID)"+
+	                                ");");
+	    });
+    }
+
+    // inserir utilizador
+	this.insertUser = function(user_ip){
+		this.db.transaction( function(transaction){
+    		transaction.executeSql("INSERT INTO USER( USER_IP )"+
+                                	"VALUES('" + user_ip + "');");
+    	});
+	}
+
+	// inserir livro
+    this.insertBook = function( TITLE, IMG_SRC, DESCRIPTION, LINK){
+    	this.db.transaction( function(transaction){
+    		transaction.executeSql("INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)"+
+                                	"VALUES('"+ TITLE +"', '"+ IMG_SRC + "', '"+ DESCRIPTION + "', '"+ LINK + "');");
+    	});
+	}
+
+	// inserir rating
+	this.insertRating = function( USER_IP, BOOK_ID, LIKES, DISLIKES ){
+		this.db.transaction( function(transaction){
+    		transaction.executeSql("INSERT INTO RATING( USER_IP, BOOK_ID, LIKES, DISLIKES )"+
+                                	"VALUES('"+ USER_IP +"', '"+ BOOK_ID + "', '"+ LIKES + "', '"+ DISLIKES + "');");
+    	});
+	}
 }
 
-var db;
-try {
-    if (!window.openDatabase) {
-        alert('not supported');
-    } else {
-        var shortName = 'database.sql';
-        var version = '1.0';
-        var displayName = 'DATA';
-        var maxSize = 2*1024*1024; // in bytes
-        db = openDatabase(shortName, version, displayName, maxSize);
- 
-    }
-} catch(e) {
-    // Error handling code goes here.
-    if (e == 2) {
-        // Version number mismatch.
-        alert("Invalid database version.");
-    } else {
-        alert("Unknown error "+e+".");
-    }
-}
+var database = new Database();
 
-function errorHandler(transaction, error)
-{
-    // error.message is a human-readable string.
-    // error.code is a numeric error code
-    alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
- 
-    // Handle errors here
-    var we_think_this_error_is_fatal = true;
-    if (we_think_this_error_is_fatal) return true;
-    return false;
-}
- 
-db.transaction(
-    function (transaction) {
-        transaction.executeSql("CREATE TABLE IF NOT EXISTS USER("+
-                                    "USER_IP     TEXT    PRIMARY KEY     NOT NULL"+
-                                ");");
 
-        transaction.executeSql("CREATE TABLE IF NOT EXISTS BOOK("+
-                                    "BOOKS_ID    INTEGER PRIMARY KEY AUTOINCREMENT   NOT NULL,"+
-                                    "TITLE       TEXT,"+
-                                    "IMG_SRC     TEXT,"+
-                                    "DESCRIPTION TEXT,"+
-                                    "LINK        TEXT"+
-                                ");");
-
-        transaction.executeSql("CREATE TABLE IF NOT EXISTS RATING("+
-                                    "LIKES       INT,"+
-                                    "DISLIKES    INT,"+
-                                    "USER_IP     TEXT,"+
-                                    "BOOKS_ID    INT,"+
-                                    "FOREIGN KEY(USER_IP) REFERENCES USER(USER_IP),"+
-                                    "FOREIGN KEY(BOOKS_ID) REFERENCES BOOK(BOOKS_ID)"+
-                                ");");
-
-        transaction.executeSql("INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)"+
-                                "VALUES('first title -0', 'first img -0', 'first desc -0', 'first link -0');");
-
-        transaction.executeSql(" SELECT * from BOOK;",
-            [], // array of values for the ? placeholders
-            function(transaction, results){
-                // Handle the results
-                var string = "Books are:\n\n";
-                for (var i=0; i<results.rows.length; i++) {
-                    var row = results.rows.item(i);
-                    string += row['BOOKS_ID'] + "\n";
-                }
-                alert(string);
-            }, errorHandler);
-    }
-);
