@@ -1,26 +1,78 @@
 
+-- facilita a leitura das tabelas
+.header on
+.mode column
 
-
+-- CREATE table of user
+CREATE TABLE USER(
+	USER_IP 	TEXT 	PRIMARY KEY 	NOT NULL
+);
 
 -- CREATE table of books
-CREATE TABLE BOOKS(
-	BOOKS_ID INT PRIMARY 	KEY 	NOT NULL,
-	TITLE  			TEXT,
-	IMG_SRC 		TEXT,
-	DESCRIPTION 	TEXT,
-	LINK 			TEXT,
-	LIKES  			INT,
-	DISLIKES 		INT	
+CREATE TABLE BOOK(
+	BOOKS_ID 	INTEGER PRIMARY KEY AUTOINCREMENT 	NOT NULL,
+	TITLE  		TEXT,
+	IMG_SRC 	TEXT,
+	DESCRIPTION TEXT,
+	LINK 		TEXT
+);
+
+-- CREATE table of likes
+CREATE TABLE RATING(
+	LIKES  		INT,
+	DISLIKES 	INT,
+	USER_IP 	TEXT,
+	BOOKS_ID 	INT,
+	FOREIGN KEY(USER_IP) REFERENCES USER(USER_IP),
+	FOREIGN KEY(BOOKS_ID) REFERENCES BOOK(BOOKS_ID)
 );
 
 
+-- ///////////////////////////////////////////// testing //////////////////////////////
 
 
--- /////////////////////////////////////////////
+INSERT INTO USER(USER_IP)
+VALUES('first-0');
+
+INSERT INTO USER(USER_IP)
+VALUES('second-0');
+
+INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)
+VALUES('first title -0', 'first img -0', 'first desc -0', 'first link -0');
+
+INSERT INTO BOOK(TITLE, IMG_SRC, DESCRIPTION, LINK)
+VALUES( 'second title -0', 'first img -0', 'first desc -0', 'first link -0');
+
+INSERT INTO RATING(LIKES, DISLIKES, USER_IP, BOOKS_ID)
+VALUES(0, 1, 'first-0', 1);
+
+INSERT INTO RATING(LIKES, DISLIKES, USER_IP, BOOKS_ID)
+VALUES(1, 0, 'first-0', 2);
+
+INSERT INTO RATING(LIKES, DISLIKES, USER_IP, BOOKS_ID)
+VALUES(1, 0, 'second-0', 2);
+
+SELECT * 
+FROM USER LEFT JOIN BOOK LEFT JOIN RATING
+on USER.USER_IP = RATING.USER_IP
+and BOOK.BOOKS_ID = RATING.BOOKS_ID;
+
+SELECT  BOOK.TITLE,
+SUM(RATING.LIKES),
+SUM(RATING.DISLIKES)
+FROM USER LEFT JOIN BOOK LEFT JOIN RATING
+on USER.USER_IP = RATING.USER_IP
+and BOOK.BOOKS_ID = RATING.BOOKS_ID
+GROUP BY BOOK.TITLE;
+
+
+
+
+-- ///////////////////////////////////////////// other class ... ///////////////////////
 
 -- CREATE COMPANY
 CREATE TABLE COMPANY(
-	ID INT PRIMARY 	KEY 	NOT NULL,
+	ID 				INT PRIMARY 	KEY 	NOT NULL,
 	NAME  			TEXT 	NOT NULL,
 	AGE 			INT 	NOT NULL,
 	ADDRESS 		CHAR(50),
