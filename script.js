@@ -385,11 +385,13 @@ function Database(){
     //     return false;
     // }
 
-    // funcao para apagar uma tabela da base de dados
-    this.erase = function(table){
+    // funcao para apagar tabelas da base de dados
+    this.erase = function(){
     	this.db.transaction( function(transaction){
     		// apaga a tabela
-    		transaction.executeSql("DROP TABLE " + table + ";");
+    		transaction.executeSql("DROP TABLE USER;");
+    		transaction.executeSql("DROP TABLE BOOK;");
+    		transaction.executeSql("DROP TABLE RATING;");
     	});
     }
 
@@ -446,4 +448,4 @@ function Database(){
 
 var database = new Database();
 
-
+database.erase();
