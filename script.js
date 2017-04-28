@@ -11,12 +11,12 @@ function Book(title, image, sinopse, link_site){
 
     // funcao para incrementar likes
     this.like = function(){
-        this.likes ++;
+        this.likes = 1;
     } 
 
     // funcao para incrementar dislikes
     this.dislike = function() {
-        this.dislikes ++;
+        this.dislikes = 1;
     }
 
     // funcao para colocar livros no ficheiro html (no fundo serve para mostrar no ecra)
@@ -39,8 +39,16 @@ function Book(title, image, sinopse, link_site){
             // Contagem de likes
             event.data.book.like();
 
-            // faz stack
+            // faz stack ( a retirar )
             bookshelf.putStack( event.data.book );
+
+            // coloca na livro na base de dados
+            database.insertBook( event.data.book.title,
+                                    event.data.book.image,
+                                    event.data.book.sinopse,
+                                    event.data.book.link_site);
+            //faz like
+            database.insertRating( event.data.book.title );
 
             // faz dequeue
             bookshelf.get( event.data.id_display -1 );
@@ -340,14 +348,32 @@ $("#btn_stack").click(data, function(event){
 
     $(".btns_g_ng").hide();
     $(".btn_next").show();
+
+    database.db.transaction( function(transaction){
+        transaction.executeSql( "SELECT USER.USER_IP, BOOK.TITLE, RATING.LIKES "+ 
+                                    "FROM USER LEFT JOIN BOOK LEFT JOIN RATING "+
+                                    "on USER.USER_IP = RATING.USER_IP "+
+                                    "and BOOK.BOOK_ID = RATING.BOOK_ID"+
+                                    ";", [],
+                                    function(transaction, results){
+                                        alert(results.rows[0].USER_IP);
+                                        alert(results.rows[0].TITLE);
+                                        alert(results.rows[0].LIKES);
+                                        alert(results.rows[1].TITLE);
+                                        alert(results.rows[2].TITLE);
+                                        alert(results.rows[3].TITLE);
+                                    }, database.errorHandler);
+                            });
 });
 
 
-// BASE DE DADOS ... -------------------------------
+// BASE DE DADOS ... --------------------------------------------------
 function Database(){
 
 	// parametro para abrir a base de dados no metodo open()
 	this.db;
+
+    this.user_ip;
 
 	// Abre a base de dados
     this.open = function(){
@@ -372,18 +398,6 @@ function Database(){
             }
         }
     }
-
-    // // funçao que retorna o erro numa janela de alerta
-    // this.errorHandler = function(transaction, error){
-    //     // error.message is a human-readable string.
-    //     // error.code is a numeric error code
-    //     alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
-     
-    //     // Handle errors here
-    //     var we_think_this_error_is_fatal = true;
-    //     if (we_think_this_error_is_fatal) return true;
-    //     return false;
-    // }
 
     // funcao para apagar tabelas da base de dados
     this.erase = function(){
@@ -421,12 +435,33 @@ function Database(){
 	    });
     }
 
+    this.errorHandler = function(transaction, error){
+        // error.message is a human-readable string.
+        // error.code is a numeric error code
+        alert('Oops.  Error was '+error.message+' (Code '+error.code+')');
+     
+        // Handle errors here
+        var we_think_this_error_is_fatal = true;
+        if (we_think_this_error_is_fatal) return true;
+        return false;
+    }
+
     // inserir utilizador
-	this.insertUser = function(user_ip){
-		this.db.transaction( function(transaction){
-    		transaction.executeSql("INSERT INTO USER( USER_IP )"+
-                                	"VALUES('" + user_ip + "');");
-    	});
+	this.insertUser = function(){
+
+        var user_ip;
+        // codigo que retorna o IP
+        $.get("http://ipinfo.io", function(response) {
+            user_ip = response.ip;
+        }, "jsonp");
+
+        var db = this.db;
+        setTimeout( function(){
+            db.transaction( function(transaction){
+                transaction.executeSql("INSERT INTO USER( USER_IP )"+
+                                        "VALUES('" + user_ip + "');");
+            });
+        }, 1000);
 	}
 
 	// inserir livro
@@ -438,14 +473,59 @@ function Database(){
 	}
 
 	// inserir rating
-	this.insertRating = function( USER_IP, BOOK_ID, LIKES, DISLIKES ){
+	this.insertRating = function( book_title ){
 		this.db.transaction( function(transaction){
+
+            var user_ip;
+            transaction.executeSql( "SELECT * FROM USER;", [], 
+                                        function(transaction, results){
+                                            user_ip = results.rows[0].USER_IP;
+                                        }, database.errorHandler);
+
+            var book_id;
+            transaction.executeSql( "SELECT * FROM BOOK WHERE TITLE = '" + book_title +"';", [], 
+                                        function(transaction, results){
+                                            book_id = results.rows[0].BOOK_ID;
+                                        }, database.errorHandler);
+
     		transaction.executeSql("INSERT INTO RATING( USER_IP, BOOK_ID, LIKES, DISLIKES )"+
-                                	"VALUES('"+ USER_IP +"', '"+ BOOK_ID + "', '"+ LIKES + "', '"+ DISLIKES + "');");
+                                	"VALUES('"+ user_ip +"', '"+ book_id + "', '"+ 1 + "', '"+ 0 + "');");
     	});
 	}
+
+    // // retorna o ip do utilizador
+    // this.getUserIP = function(){
+    //     // var result;
+    //     this.db.transaction( function(transaction){
+    //         transaction.executeSql( "SELECT * FROM USER;", [], 
+    //                                     function(transaction, results){
+    //                                         return (results.rows[0].USER_IP);
+    //                                     }, database.errorHandler);
+    //                             });
+    // }
+
+    // // retorna o ID de um livro
+    // this.getBookID = function(title){
+    //     // var result;
+    //     database.db.transaction( function(transaction){
+    //         transaction.executeSql( "SELECT * FROM BOOK WHERE TITLE = '" + title +"';", [], 
+    //                                     function(transaction, results){
+    //                                         return (results.rows[0].BOOK_ID);
+    //                                     }, database.errorHandler);
+    //                             // return result;
+    //                             });
+    // }
 }
 
 var database = new Database();
 
-database.erase();
+database.open();
+database.create();
+database.insertUser();
+
+$("#btn_erase_all_data").click( function(){
+    database.erase();
+    database.create();
+    database.insertUser();
+});
+
