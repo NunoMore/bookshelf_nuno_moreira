@@ -448,4 +448,12 @@ function Database(){
 
 var database = new Database();
 
-database.erase();
+database.create();
+
+$.get("http://ipinfo.io", function(response) {
+    database.insertUser(response.ip);
+}, "jsonp");
+
+database.db.transaction( function(transaction){
+    transaction.executeSql("SELECT * FROM USER;",[], console.log(results));
+});
