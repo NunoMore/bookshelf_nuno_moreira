@@ -6,18 +6,18 @@ function Book(title, image, sinopse, link_site){
     this.image = image;
     this.sinopse = sinopse;
     this.link_site = link_site;
-    this.likes = 0;
-    this.dislikes = 0;
-
-    // funcao para incrementar likes
-    this.like = function(){
-        this.likes ++;
-    } 
-
-    // funcao para incrementar dislikes
-    this.dislike = function() {
-        this.dislikes ++;
-    }
+//    this.likes = 0;
+//    this.dislikes = 0;
+//
+//    // funcao para incrementar likes
+//    this.like = function(){
+//        this.likes = 1;
+//    } 
+//
+//    // funcao para incrementar dislikes
+//    this.dislike = function() {
+//        this.dislikes = 1;
+//    }
 
     // funcao para colocar livros no ficheiro html (no fundo serve para mostrar no ecra)
     this.write = function(num_display){
@@ -26,8 +26,8 @@ function Book(title, image, sinopse, link_site){
         $("#img" + num_display).attr("src", this.image );                // Escreve imagem
         $("#sinopse" + num_display).html( this.sinopse );                // Escreve sinopse
         $("#site_oficial" + num_display).attr( "href", this.link_site ); // altera o link de site
-        $(".like" + num_display).html( this.likes );                    // altera numero de likes
-        $(".dis_like" + num_display).html( this.dislikes );             // altera numero de dislikes
+//        $(".like" + num_display).html( this.likes );                    // altera numero de likes
+//        $(".dis_like" + num_display).html( this.dislikes );             // altera numero de dislikes
 
         // Variavel com informacao necessaria para os cliques
         var data = {"book":this, "id_display":num_display};
@@ -36,44 +36,71 @@ function Book(title, image, sinopse, link_site){
         $("#bt" + num_display + "_g").off('click');        // retira o click para se adicionar outra vez
         $("#bt" + num_display + "_g").click(data, function(event){
 
-            // Contagem de likes
-            event.data.book.like();
+//            // Contagem de likes
+//            event.data.book.like();
 
-            // faz stack
-            bookshelf.putStack( event.data.book );
+            // coloca na livro na base de dados
+            database.insertBook( event.data.book.title,
+                                    event.data.book.image,
+                                    event.data.book.sinopse,
+                                    event.data.book.link_site);
+            //faz like
+            database.insertRating( event.data.book.title );
 
             // faz dequeue
-            bookshelf.get( event.data.id_display -1 );
+            bookshelf.get( event.data.id_display -1 , bookshelf.books);
 
             // mudar livro
-            bookshelf.switch_books( event.data.id_display );
+            bookshelf.switch_books( event.data.id_display , bookshelf.books);
 
         });
 
-        // botao de nao like
+        // botao de nao like (remove)
         $("#bt" + num_display + "_ng").off('click');        // retira o click para se adicionar outra vez
         $("#bt" + num_display + "_ng").click(data, function(event){
 
-            // Contagem de deslikes
-            event.data.book.dislike();
+//            // Contagem de deslikes
+//            event.data.book.dislike();
 
             // faz dequeue
-            bookshelf.get( event.data.id_display -1 );
+            bookshelf.get( event.data.id_display -1 , bookshelf.books);
 
             // mudar livro           
-            bookshelf.switch_books( event.data.id_display );
+            bookshelf.switch_books( event.data.id_display , bookshelf.books);
         });
 
         // botao de next
         $("#bt" + num_display + "_next").off('click');        // retira o click para se adicionar outra vez
         $("#bt" + num_display + "_next").click(data, function(event){
 
-            // retira da stack
-            bookshelf.getStack(  event.data.id_display -1 );
+//            // retira da stack
+//            bookshelf.getStack(  event.data.id_display -1 );
+//
+//            // mudar livro
+//            bookshelf.switch_booksStack( event.data.id_display );
+
+            // faz dequeue
+            bookshelf.get( event.data.id_display -1 , bookshelf.database);
 
             // mudar livro
-            bookshelf.switch_booksStack( event.data.id_display );
+            bookshelf.switch_books( event.data.id_display , bookshelf.database);
         });
+
+        // botao de delete
+        $("#bt" + num_display + "_delete").off('click');        // retira o click para se adicionar outra vez
+        $("#bt" + num_display + "_delete").click(data, function(event){
+
+            // faz delete na base de dados
+            database.deleteBook( event.data.book.title )
+
+            // faz dequeue
+            bookshelf.get( event.data.id_display -1 , bookshelf.database);
+
+            // mudar livro
+            bookshelf.switch_books( event.data.id_display , bookshelf.database);
+
+        });
+
     };
 };
 
@@ -99,34 +126,14 @@ function Queue(){
     }
 }
 
-// pilha de livros
-function Stack(){
-
-    // dados
-    this.data = [];
-
-    // funcao para mostrar dados
-    this.show = function(index){
-        return this.data[  this.data.length -1 - index];
-    }
-
-    // coloca dados
-    this.stack = function(element){
-        this.data.push(element);
-    }
-
-    // funcao para mostrar os livros de que se gostou
-    this.getStack = function(index){
-        this.data[this.data.length -1 - index] ? this.data.splice( this.data.length -1 - index , 1) : this.data.splice(0, 0);
-    }
-}
-
 // prateleira
 function Bookshelf(){
 
     // local para guardar os livros em fila
     this.books = new Queue();
-    this.booksStack = new Stack();
+
+    // local para guardar os livros favoritos em fila para serem mostrados
+    this.database = new Queue();
 
     // funcao de receber da API da google
     this.search = function(string, index){
@@ -165,37 +172,23 @@ function Bookshelf(){
             this.books.enQueue(book);
         }
 
-        this.show(0).write(1);
-        this.show(1) ? this.show(1).write(2) : emptyBook.write(2);
-        this.show(2) ? this.show(2).write(3) : emptyBook.write(3);
-    };
-
-    // funcao para colocar livros que se gosta na pilha
-    this.putStack = function(book){
-        this.booksStack.stack(book);
+        this.show(0, bookshelf.books).write(1);
+        this.show(1, bookshelf.books) ? this.show(1, bookshelf.books).write(2) : emptyBook.write(2);
+        this.show(2, bookshelf.books) ? this.show(2, bookshelf.books).write(3) : emptyBook.write(3);
     }
 
     // funcao para retirar livros da prateleira
-    this.get = function(index){
-        this.books.deQueue(index);
-    }
-
-    this.getStack = function(index){
-        this.booksStack.getStack(index);
+    this.get = function(index, queue){
+        queue.deQueue(index);
     }
 
     // funcao para mostrar livros da prateleira / fila
-    this.show = function(index){
-        return this.books.show(index);
-    }
-
-    // funcao para mostrar livros da stack pilha
-    this.showStack = function(index){
-        return this.booksStack.show(index);
+    this.show = function(index, queue){
+        return queue.show(index);
     }
 
     // funcao para trocar livros no html da prateleira
-    this.switch_books = function(num_display){
+    this.switch_books = function(num_display, queue){
 
         // Animacao de saida do livro presente
         if (num_display == 1) {
@@ -215,9 +208,9 @@ function Bookshelf(){
         setTimeout(function(){ 
 
             // mostra livros novamente ou um livro vazio
-            bookshelf.show(0) ? bookshelf.show(0).write(1) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
-            bookshelf.show(1) ? bookshelf.show(1).write(2) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
-            bookshelf.show(2) ? bookshelf.show(2).write(3) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+            bookshelf.show(0, queue) ? bookshelf.show(0, queue).write(1) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+            bookshelf.show(1, queue) ? bookshelf.show(1, queue).write(2) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+            bookshelf.show(2, queue) ? bookshelf.show(2, queue).write(3) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
 
             // Remocao de animacao 
             $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
@@ -226,43 +219,9 @@ function Bookshelf(){
         },1000);
     };
 
-    // funcao para mostrar livros da pilha que se gostou
-    this.switch_booksStack = function(num_display){
-
-        // Animacao de saida do livro presente
-        if (num_display == 1) {
-            $("#div1").addClass('animated rotateOutDownLeft');
-            $("#div2").addClass('animated slideOutLeft');
-            $("#div3").addClass('animated slideOutLeft');
-        } else if (num_display == 2) {
-            $("#div2").addClass('animated rotateOutDownLeft');
-            $("#div3").addClass('animated slideOutLeft');
-        } else if (num_display == 3) {
-            $("#div3").addClass('animated rotateOutDownLeft');
-        }
-
-        var bookshelf = this; // variavel criada porque nao da para aceder a objectos na funcao de setTimeout
-
-        // Delay entre saida e entrada entre livros
-        setTimeout(function(){ 
-
-            // mostra livros da pilha ou um livro vazio
-            bookshelf.showStack(0) ? bookshelf.showStack(0).write(1) : emptyBook.write(1);
-            bookshelf.showStack(1) ? bookshelf.showStack(1).write(2) : emptyBook.write(2);
-            bookshelf.showStack(2) ? bookshelf.showStack(2).write(3) : emptyBook.write(3);
-
-            // Remocao de animacao
-            $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
-            $("#div2").removeClass('animated slideOutLeft rotateOutDownLeft');
-            $("#div3").removeClass('animated slideOutLeft rotateOutDownLeft');
-        },1000);
-
-        
-    }
-
     // funcao para fazer "dequeue" a toda a bookshelf
-    this.erase = function(){
-        this.books.data = [];
+    this.erase = function(queue){
+        queue.data = [];
     }
 
     //  funcao para loading screen 
@@ -298,8 +257,6 @@ var emptyBook = new Book(
     "There are no more books!",
     'https://static.stuff.co.nz/1362990757/065/8411065.jpg',
     'Empty Synopsis...',
-    '',
-    '',
     ''
 );
 
@@ -321,29 +278,29 @@ var SearchIndexConstant = 0;
 $("#btn_search").click(data, function(event){
     SearchIndexConstant = 0;
     var string = $("#search_input").val();
-    event.data.bookshelf.erase();
+    event.data.bookshelf.erase( bookshelf.database );
     event.data.bookshelf.search( string , SearchIndexConstant);
     
     $(".btns_g_ng").show();
-    $(".btn_next").hide();
+    $(".btns_next_delete").hide();
 });
 
 $("#div_principal").hide();
 
-// botao para mostrar pilha de livros de que gostou
-$("#btn_stack").click(data, function(event){
+// botao para mostrar fila de livros de que gostou
+$("#btn_library").click(data, function(event){
     
     bookshelf.loading();
-    bookshelf.showStack(0) ? bookshelf.showStack(0).write(1) : emptyBook.write(1);
-    bookshelf.showStack(1) ? bookshelf.showStack(1).write(2) : emptyBook.write(2);
-    bookshelf.showStack(2) ? bookshelf.showStack(2).write(3) : emptyBook.write(3);
+    bookshelf.show(0, bookshelf.database) ? bookshelf.show(0, bookshelf.database).write(1) : emptyBook.write(1);
+    bookshelf.show(1, bookshelf.database) ? bookshelf.show(1, bookshelf.database).write(2) : emptyBook.write(2);
+    bookshelf.show(2, bookshelf.database) ? bookshelf.show(2, bookshelf.database).write(3) : emptyBook.write(3);
 
     $(".btns_g_ng").hide();
-    $(".btn_next").show();
+    $(".btns_next_delete").show();
 });
 
 
-// BASE DE DADOS ... -------------------------------
+// BASE DE DADOS ... --------------------------------------------------
 function Database(){
 
 	// parametro para abrir a base de dados no metodo open()
@@ -373,22 +330,10 @@ function Database(){
         }
     }
 
-    // // funçao que retorna o erro numa janela de alerta
-    // this.errorHandler = function(transaction, error){
-    //     // error.message is a human-readable string.
-    //     // error.code is a numeric error code
-    //     alert('Oops.  Error was: '+error.message+' (Code '+error.code+')');
-     
-    //     // Handle errors here
-    //     var we_think_this_error_is_fatal = true;
-    //     if (we_think_this_error_is_fatal) return true;
-    //     return false;
-    // }
-
     // funcao para apagar tabelas da base de dados
     this.erase = function(){
     	this.db.transaction( function(transaction){
-    		// apaga a tabela
+    		// apaga as tabelas
     		transaction.executeSql("DROP TABLE USER;");
     		transaction.executeSql("DROP TABLE BOOK;");
     		transaction.executeSql("DROP TABLE RATING;");
@@ -421,12 +366,37 @@ function Database(){
 	    });
     }
 
+    this.errorHandler = function(transaction, error){
+        // error.message is a human-readable string.
+        // error.code is a numeric error code
+        alert('Oops.  Error was '+error.message+' (Code '+error.code+')');
+     
+        // Handle errors here
+        var we_think_this_error_is_fatal = true;
+        if (we_think_this_error_is_fatal) return true;
+        return false;
+    }
+
     // inserir utilizador
-	this.insertUser = function(user_ip){
-		this.db.transaction( function(transaction){
-    		transaction.executeSql("INSERT INTO USER( USER_IP )"+
-                                	"VALUES('" + user_ip + "');");
-    	});
+	this.insertUser = function(){
+        var db = this.db;
+        // codigo que retorna o IP
+        $.get("http://ipinfo.io", function(response) {
+            var user_ip = response.ip;
+            // transaçao para inserir user_IP
+            db.transaction( function(transaction){
+                transaction.executeSql("INSERT INTO USER( USER_IP )"+
+                                        "VALUES('" + user_ip + "');");
+            });
+        }, "jsonp");
+
+//        var db = this.db;
+//        setTimeout( function(){
+//            db.transaction( function(transaction){
+//                transaction.executeSql("INSERT INTO USER( USER_IP )"+
+//                                        "VALUES('" + user_ip + "');");
+//            });
+//        }, 1000);
 	}
 
 	// inserir livro
@@ -438,22 +408,71 @@ function Database(){
 	}
 
 	// inserir rating
-	this.insertRating = function( USER_IP, BOOK_ID, LIKES, DISLIKES ){
+	this.insertRating = function( book_title ){
 		this.db.transaction( function(transaction){
-    		transaction.executeSql("INSERT INTO RATING( USER_IP, BOOK_ID, LIKES, DISLIKES )"+
-                                	"VALUES('"+ USER_IP +"', '"+ BOOK_ID + "', '"+ LIKES + "', '"+ DISLIKES + "');");
-    	});
-	}
+
+            var user_ip;
+            var book_id;
+
+            transaction.executeSql( "SELECT * FROM USER;", [], 
+                                        function(transaction, results){
+                                            user_ip = results.rows[0].USER_IP;
+                transaction.executeSql( "SELECT * FROM BOOK WHERE TITLE = '" + book_title +"';", [], 
+                                        function(transaction, results){
+                                            book_id = results.rows[0].BOOK_ID;
+                    transaction.executeSql("INSERT INTO RATING( USER_IP, BOOK_ID, LIKES, DISLIKES )"+
+                                              "VALUES('"+ user_ip +"', '"+ book_id + "', '"+ 1 + "', '"+ 0 + "');");
+                }, database.errorHandler);
+            }, database.errorHandler);
+	   }, database.errorHandler);
+    }
+
+    this.queueBooks = function(){
+
+        transaction.executeSql( "SELECT * FROM BOOK;", [], 
+                                        function(transaction, results){
+                                            
+                                            //ciclo dos livros para os colocar na fila à espera de aparecerem no ecra
+                                            for (var i = 0; i < results.rows.length; i++) {
+                                                var book = new Book(
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    ''
+                                                );
+
+                                                // caso os livros nao tenham alguma das informacoes necessarias como titulo ou imagem é colocado por default algo a dizer que tal informacao nao foi recebida/nao existe
+                                                results.rows[i].TITLE ? book.title = results.rows[i].TITLE : book.title = 'There is no title available';
+                                                results.rows[i].IMG_SRC ? book.image = results.rows[i].IMG_SRC : book.image = 'http://www.stevegiasson.com/public/media/images/oeuvres_images/image/there_is_no_image_available_72dpi.jpg';
+                                                results.rows[i].DESCRIPTION ? book.sinopse = results.rows[i].DESCRIPTION : book.sinopse = 'There is no description available';
+                                                results.rows[i].LINK ? book.link_site = results.rows[i].LINK : book.link_site = '';
+
+                                                // Colocar os livros na fila à espera de aparecerem no ecra
+                                                bookshelf.database.enQueue(book);
+                                            }
+
+                                            this.show(0, bookshelf.database).write(1);
+                                            this.show(1, bookshelf.database) ? this.show(1, bookshelf.database).write(2) : emptyBook.write(2);
+                                            this.show(2, bookshelf.database) ? this.show(2, bookshelf.database).write(3) : emptyBook.write(3);
+            }, database.errorHandler);
+    }
+
+    this.deleteBook = function( book_title ){
+        transaction.executeSql( "DELETE * FROM BOOK WHERE TITLE = '" + 
+                                    book_title +"';", [],
+            database.errorHandler);
+    }
 }
 
 var database = new Database();
 
+database.open();
 database.create();
+database.insertUser();
 
-$.get("http://ipinfo.io", function(response) {
-    database.insertUser(response.ip);
-}, "jsonp");
-
-database.db.transaction( function(transaction){
-    transaction.executeSql("SELECT * FROM USER;",[], console.log(results));
+$("#btn_erase_all_data").click( function(){
+    database.erase();
+    database.create();
+    database.insertUser();
 });
+
