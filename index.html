@@ -12,6 +12,12 @@
 		<!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
+		<!-- codigo temporario para trabalhar offline -->
+		<link rel="stylesheet" href="C:\Users\Julia Fernandes\Desktop\projectos java\bookshelf_nuno_moreira\bootstrap-3.3.7-dist\css\bootstrap.min.css">
+
+		<!-- codigo temporario para trabalhar offline -->
+		<link rel="stylesheet" href="C:\Users\Julia Fernandes\Desktop\projectos java\bookshelf_nuno_moreira\bootstrap-3.3.7-dist\css\bootstrap-theme.min.css">
+
 		<!-- Link para utilizar CSS3 -->
 		<link rel = "stylesheet" type = "text/css" href = "style.css" />
 
@@ -21,7 +27,7 @@
 	   	<!-- Link para uso de animate.css (site com animacoes) -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--		<meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
 
 	</head>
 
@@ -45,7 +51,7 @@
 				
 			</div>
 			<div class="col-md-8">
-				<h2 id="intro">This web app returns results considering the google books API. It might contain several books with no image or synopsis, or even different stuff other then books. Please rate them to improve the filter behind this search engine. Enjoy and thanks for using my WebSite!</h2>
+				<h2 id="intro">This web app returns results considering the google books API. It might contain several books with no image or synopsis, or even different stuff other then books. Choose if you want to save them in your own personal database or remove them from the search results. Enjoy and thanks for using my WebSite!</h2>
 			</div>
 		</div>
 
@@ -63,16 +69,17 @@
 			
 			<!-- botao de show stack -->
 			<div class="col-md-4 centrartexto">
-				<button id="btn_stack" type="button" class="btn btn-default btn-sm">
-					Show List of books you liked
+				<button id="btn_library" type="button" class="btn btn-default btn-sm">
+					Saved Books (Library)
 				</button>
-				<h5>(temporary save, once you click "next" they clear history)</h5>
+				<h5>Your own personal library!</h5>
 			</div>
 
 			<div id="div_search" class="col-md-2 centrartexto">
 				<button id="btn_erase_all_data" type="button" class="btn btn-default btn-sm">
 					Erase all saved data.
 				</button>
+				<h5>WARNING: There is no turning back from this!</h5>
 			</div>
 		</div>
 
@@ -84,7 +91,6 @@
 					<div id="myBar" class="centrartexto">0%</div>Try to search something!
 				</div>
 			</div>
-
 		</div>
 
 		<!-- 3 espacos de apresentacao -->
@@ -92,7 +98,7 @@
 
 			<!-- instrucoes -->
 			<div id="div_instructions" class="row Wave-Loader Wave">
-				Make a search! Now, rotate the search results by rating as 'Like' or 'Dislike'!
+				Make a search! Now, rotate the search results by clicking 'Save' or 'Remove'!
 			</div>
 
 			<!-- Espaco 1 -->
@@ -111,27 +117,31 @@
 							<div class="col-md-12 centrartexto">
 							<!-- Botao 1 -->
 								<button id="bt1_g" type="button" class="btn btn-primary btn-sm">
-									Like
+									Save   <!-- like -->
 								</button>
 							    
-							    <p> Likes:<a class="like1">0</a> </p>
+							<!--    <p> Likes:<a class="like1">0</a> </p> -->
 							<!-- Botao 2 -->
 								<button id="bt1_ng" type="button" class="btn btn-primary btn-sm">
-									Dislike
+									Remove   <!-- dislike -->
 								</button>
 
-							    <p> Dislikes:<a class="dis_like1">0</a> </p>
+							 <!--   <p> Dislikes:<a class="dis_like1">0</a> </p> -->
 							</div>
 						</div>
 
-						<!-- Botao de next para pilha -->
-						<div class="row btn_next like_button animated infinite pulse">
+						<!-- Botoes para fila de favoritos -->
+						<div class="row btns_next_delete like_button animated infinite pulse">
 							<div class="col-md-12 centrartexto">
-							<!-- Botao -->
+								<!-- Botao de next -->
 								<button id="bt1_next" type="button" class="btn btn-primary btn-sm">
 									Next 
 								</button>
-								<p> Likes:<a class="like1">0</a> </p>
+
+								<!-- Botao de delete -->
+								<button id="bt1_delete" type="button" class="btn btn-primary btn-sm">
+									Delete 
+								</button>
 							</div>
 						</div>
 
@@ -165,33 +175,37 @@
 						<img id="img2" src=""
 							class="img-thumbnail">
 					
-						<!-- Botoes -->
+						<!-- Botoes de like e dislike -->
 						<div class="row btns_g_ng like_button animated infinite pulse">
 							<!-- Botao 1 -->
 							<div class="col-md-12 centrartexto">
 								
 								<button id="bt2_g" type="button" class="btn btn-primary btn-sm">
-									Like
+									Save   <!-- like -->
 								</button>
 							    
-							    <p> Likes:<a class="like2">0</a> </p>
+							<!--    <p> Likes:<a class="like2">0</a> </p> -->
 							<!-- Botao 2 -->
 								<button id="bt2_ng" type="button" class="btn btn-primary btn-sm">
-									Dislike
+									Remove   <!-- dislike -->
 								</button>
 
-							    <p> Dislikes:<a class="dis_like2">0</a> </p>
+							<!--    <p> Dislikes:<a class="dis_like2">0</a> </p> -->
 							</div>
 						</div>
 
-						<!-- Botao de next para pilha -->
-						<div class="row btn_next like_button animated infinite pulse">
+						<!-- Botoes para fila de favoritos -->
+						<div class="row btns_next_delete like_button animated infinite pulse">
 							<div class="col-md-12 centrartexto">
-							<!-- Botao -->
+								<!-- Botao de next -->
 								<button id="bt2_next" type="button" class="btn btn-primary btn-sm">
 									Next 
 								</button>
-								<p> Likes:<a class="like2">0</a> </p>
+
+								<!-- Botao de delete -->
+								<button id="bt2_delete" type="button" class="btn btn-primary btn-sm">
+									Delete 
+								</button>
 							</div>
 						</div>
 
@@ -225,33 +239,37 @@
 						<img id="img3" src=""
 							class="img-thumbnail">
 
-						<!-- Botoes -->
+						<!-- Botoes de like e dislike -->
 						<div class="row btns_g_ng like_button animated infinite pulse">
 							<!-- Botao 1 -->
 							<div class="col-md-12 centrartexto">
 								
 								<button id="bt3_g" type="button" class="btn btn-primary btn-sm">
-									Like
+									Save   <!-- like -->
 								</button>
 							    
-							    <p> Likes:<a class="like3">0</a> </p>
+							<!--    <p> Likes:<a class="like3">0</a> </p> -->
 							<!-- Botao 2 -->
 								<button id="bt3_ng" type="button" class="btn btn-primary btn-sm">
-									Dislike
+									Remove   <!-- like -->
 								</button>
 
-							    <p> Dislikes:<a class="dis_like3">0</a> </p>
+							<!--    <p> Dislikes:<a class="dis_like3">0</a> </p> -->
 							</div>
 						</div>
 
-						<!-- Botao de next para pilha -->
-						<div class="row btn_next like_button animated infinite pulse">
+						<!-- Botoes para fila de favoritos -->
+						<div class="row btns_next_delete like_button animated infinite pulse">
 							<div class="col-md-12 centrartexto">
-							<!-- Botao -->
+							<!-- Botao de next -->
 								<button id="bt3_next" type="button" class="btn btn-primary btn-sm">
 									Next 
 								</button>
-								<p> Likes:<a class="like3">0</a> </p>
+
+								<!-- Botao de delete -->
+								<button id="bt3_delete" type="button" class="btn btn-primary btn-sm">
+									Delete 
+								</button>
 							</div>
 						</div>
 
@@ -282,10 +300,15 @@
 			src="https://code.jquery.com/jquery-3.2.0.min.js">
 		</script>
 
+		<script src="C:\Users\Julia Fernandes\Desktop\projectos java\bookshelf_nuno_moreira\jquery-3.2.1.min.js" ></script>
+
 		<!-- Ficheiro script online para Bootstrap -->
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
 		</script>
+
+		<!-- codigo temporario para trabalhar offline -->
+		<script type="text/javascript" src="C:\Users\Julia Fernandes\Desktop\projectos java\bookshelf_nuno_moreira\bootstrap-3.3.7-dist\js\bootstrap.min.js" ></script>
 
 		<!-- Ficheiro javascript  -->
 		<script 
