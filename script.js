@@ -91,7 +91,7 @@ function Book(title, image, sinopse, link_site){
         $("#bt" + num_display + "_delete").click(data, function(event){
 
             // faz delete na base de dados
-            database.deleteBook( event.data.book.title )
+            database.deleteBook( event.data.book.title );
 
             // faz dequeue
             bookshelf.get( event.data.id_display -1 , bookshelf.database);
@@ -205,18 +205,34 @@ function Bookshelf(){
         var bookshelf = this; // variavel criada porque nao da para aceder a objectos na funcao de setTimeout
 
         // Delay entre saida e entrada entre livros
-        setTimeout(function(){ 
+        if (queue == bookshelf.books) {
+            setTimeout(function(){ 
 
-            // mostra livros novamente ou um livro vazio
-            bookshelf.show(0, queue) ? bookshelf.show(0, queue).write(1) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
-            bookshelf.show(1, queue) ? bookshelf.show(1, queue).write(2) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
-            bookshelf.show(2, queue) ? bookshelf.show(2, queue).write(3) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+                // mostra livros novamente ou um livro vazio
+                bookshelf.show(0, queue) ? bookshelf.show(0, queue).write(1) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+                bookshelf.show(1, queue) ? bookshelf.show(1, queue).write(2) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
+                bookshelf.show(2, queue) ? bookshelf.show(2, queue).write(3) : bookshelf.search( $("#search_input").val(), SearchIndexConstant);
 
-            // Remocao de animacao 
-            $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
-            $("#div2").removeClass('animated slideOutLeft rotateOutDownLeft');
-            $("#div3").removeClass('animated slideOutLeft rotateOutDownLeft');
-        },1000);
+                // Remocao de animacao 
+                $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
+                $("#div2").removeClass('animated slideOutLeft rotateOutDownLeft');
+                $("#div3").removeClass('animated slideOutLeft rotateOutDownLeft');
+            },1000);
+
+        } else if (queue == bookshelf.database) {
+            setTimeout(function(){ 
+
+                // mostra livros novamente ou um livro vazio
+                bookshelf.show(0, queue) ? bookshelf.show(0, queue).write(1) : emptyBook.write(1);
+                bookshelf.show(1, queue) ? bookshelf.show(1, queue).write(2) : emptyBook.write(2);
+                bookshelf.show(2, queue) ? bookshelf.show(2, queue).write(3) : emptyBook.write(3);
+
+                // Remocao de animacao 
+                $("#div1").removeClass('animated slideOutLeft rotateOutDownLeft');
+                $("#div2").removeClass('animated slideOutLeft rotateOutDownLeft');
+                $("#div3").removeClass('animated slideOutLeft rotateOutDownLeft');
+            },1000);
+        }
     };
 
     // funcao para fazer "dequeue" a toda a bookshelf
@@ -273,13 +289,12 @@ var emptyData = new Data({
                         });
 
 // botao de search (procura)
-var data = {"bookshelf":bookshelf}
 var SearchIndexConstant = 0;
-$("#btn_search").click(data, function(event){
+$("#btn_search").click(function(){
     SearchIndexConstant = 0;
     var string = $("#search_input").val();
-    event.data.bookshelf.erase( bookshelf.database );
-    event.data.bookshelf.search( string , SearchIndexConstant);
+    bookshelf.erase( bookshelf.books );
+    bookshelf.search( string , SearchIndexConstant);
     
     $(".btns_g_ng").show();
     $(".btns_next_delete").hide();
@@ -288,8 +303,11 @@ $("#btn_search").click(data, function(event){
 $("#div_principal").hide();
 
 // botao para mostrar fila de livros de que gostou
-$("#btn_library").click(data, function(event){
+$("#btn_library").click(function(){
     
+    bookshelf.erase( bookshelf.database );
+    database.queueBooks();
+
     bookshelf.loading();
     bookshelf.show(0, bookshelf.database) ? bookshelf.show(0, bookshelf.database).write(1) : emptyBook.write(1);
     bookshelf.show(1, bookshelf.database) ? bookshelf.show(1, bookshelf.database).write(2) : emptyBook.write(2);
@@ -366,17 +384,6 @@ function Database(){
 	    });
     }
 
-    this.errorHandler = function(transaction, error){
-        // error.message is a human-readable string.
-        // error.code is a numeric error code
-        alert('Oops.  Error was '+error.message+' (Code '+error.code+')');
-     
-        // Handle errors here
-        var we_think_this_error_is_fatal = true;
-        if (we_think_this_error_is_fatal) return true;
-        return false;
-    }
-
     // inserir utilizador
 	this.insertUser = function(){
         var db = this.db;
@@ -403,7 +410,7 @@ function Database(){
     this.insertBook = function( TITLE, IMG_SRC, DESCRIPTION, LINK){
     	this.db.transaction( function(transaction){
     		transaction.executeSql("INSERT INTO BOOK( TITLE, IMG_SRC, DESCRIPTION, LINK)"+
-                                	"VALUES('"+ TITLE +"', '"+ IMG_SRC + "', '"+ DESCRIPTION + "', '"+ LINK + "');");
+                                	'VALUES("'+ TITLE +'", "'+ IMG_SRC + '", "'+ DESCRIPTION + '", "'+ LINK + '");');
     	});
 	}
 
@@ -422,45 +429,54 @@ function Database(){
                                             book_id = results.rows[0].BOOK_ID;
                     transaction.executeSql("INSERT INTO RATING( USER_IP, BOOK_ID, LIKES, DISLIKES )"+
                                               "VALUES('"+ user_ip +"', '"+ book_id + "', '"+ 1 + "', '"+ 0 + "');");
-                }, database.errorHandler);
-            }, database.errorHandler);
-	   }, database.errorHandler);
+                });
+            });
+	   });
     }
 
     this.queueBooks = function(){
+        this.db.transaction( function(transaction){
+            transaction.executeSql( "SELECT * FROM BOOK;", [], 
+                                            function(transaction, results){
+                                                
+                                                //ciclo dos livros para os colocar na fila à espera de aparecerem no ecra
+                                                for (var i = 0; i < results.rows.length; i++) {
+                                                    var book = new Book(
+                                                        '',
+                                                        '',
+                                                        '',
+                                                        ''
+                                                    );
 
-        transaction.executeSql( "SELECT * FROM BOOK;", [], 
-                                        function(transaction, results){
-                                            
-                                            //ciclo dos livros para os colocar na fila à espera de aparecerem no ecra
-                                            for (var i = 0; i < results.rows.length; i++) {
-                                                var book = new Book(
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    ''
-                                                );
+                                                    // caso os livros nao tenham alguma das informacoes necessarias como titulo ou imagem é colocado por default algo a dizer que tal informacao nao foi recebida/nao existe
+                                                    results.rows[i].TITLE ? book.title = results.rows[i].TITLE : book.title = 'There is no title available';
+                                                    results.rows[i].IMG_SRC ? book.image = results.rows[i].IMG_SRC : book.image = 'http://www.stevegiasson.com/public/media/images/oeuvres_images/image/there_is_no_image_available_72dpi.jpg';
+                                                    results.rows[i].DESCRIPTION ? book.sinopse = results.rows[i].DESCRIPTION : book.sinopse = 'There is no description available';
+                                                    results.rows[i].LINK ? book.link_site = results.rows[i].LINK : book.link_site = '';
 
-                                                // caso os livros nao tenham alguma das informacoes necessarias como titulo ou imagem é colocado por default algo a dizer que tal informacao nao foi recebida/nao existe
-                                                results.rows[i].TITLE ? book.title = results.rows[i].TITLE : book.title = 'There is no title available';
-                                                results.rows[i].IMG_SRC ? book.image = results.rows[i].IMG_SRC : book.image = 'http://www.stevegiasson.com/public/media/images/oeuvres_images/image/there_is_no_image_available_72dpi.jpg';
-                                                results.rows[i].DESCRIPTION ? book.sinopse = results.rows[i].DESCRIPTION : book.sinopse = 'There is no description available';
-                                                results.rows[i].LINK ? book.link_site = results.rows[i].LINK : book.link_site = '';
+                                                    // Colocar os livros na fila à espera de aparecerem no ecra
+                                                    bookshelf.database.enQueue(book);
+                                                }
 
-                                                // Colocar os livros na fila à espera de aparecerem no ecra
-                                                bookshelf.database.enQueue(book);
-                                            }
-
-                                            this.show(0, bookshelf.database).write(1);
-                                            this.show(1, bookshelf.database) ? this.show(1, bookshelf.database).write(2) : emptyBook.write(2);
-                                            this.show(2, bookshelf.database) ? this.show(2, bookshelf.database).write(3) : emptyBook.write(3);
-            }, database.errorHandler);
+                                                bookshelf.show(0, bookshelf.database).write(1);
+                                                bookshelf.show(1, bookshelf.database) ? bookshelf.show(1, bookshelf.database).write(2) : emptyBook.write(2);
+                                                bookshelf.show(2, bookshelf.database) ? bookshelf.show(2, bookshelf.database).write(3) : emptyBook.write(3);
+                });
+        });
     }
 
     this.deleteBook = function( book_title ){
-        transaction.executeSql( "DELETE * FROM BOOK WHERE TITLE = '" + 
-                                    book_title +"';", [],
-            database.errorHandler);
+        this.db.transaction( function(transaction){
+            transaction.executeSql("SELECT * FROM BOOK WHERE TITLE = '" + 
+                                        book_title +"';", [], 
+                                    function(transaction, results){
+                                        var book_id = results.rows[0].BOOK_ID;                         
+                transaction.executeSql( "DELETE FROM RATING WHERE BOOK_ID = '" + 
+                                            book_id +"';" );                       
+                    transaction.executeSql( "DELETE FROM BOOK WHERE TITLE = '" + 
+                                            book_title +"';", [] );
+            });
+        });
     }
 }
 
