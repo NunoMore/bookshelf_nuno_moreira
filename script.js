@@ -253,7 +253,7 @@ function Bookshelf(){
             if (width >= 100) {
                 clearInterval(id);
             } else {
-                width+=0.4; 
+                width+=1; 
                 elem.style.width = width + '%'; 
                 elem.innerHTML = width.toFixed(1) * 1 + '%';
             }
@@ -261,7 +261,7 @@ function Bookshelf(){
         setTimeout(function(){
             $("#div_principal").show();
             $("#div_loading").hide();
-        },2800)
+        },1500)
     }
 };
 
